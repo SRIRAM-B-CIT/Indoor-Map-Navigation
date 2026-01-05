@@ -148,7 +148,9 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
   // QR Code URL copy state
   const [qrUrlCopied, setQrUrlCopied] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrAddressType, setQrAddressType] = useState<'localhost' | 'network'>('localhost');
+  const [qrAddressType, setQrAddressType] = useState<"localhost" | "network">(
+    "localhost"
+  );
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   // Fetch available maps for gateway dropdown
@@ -467,14 +469,14 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
   // Generate QR Code URL for selected node
   const generateQRCodeURL = useCallback(() => {
     if (!selectedNode) return "";
-    
+
     let baseUrl: string;
-    if (qrAddressType === 'network') {
-      baseUrl = 'http://10.10.25.29:3000';
+    if (qrAddressType === "network") {
+      baseUrl = "http://10.10.25.29:3000";
     } else {
       baseUrl = typeof window !== "undefined" ? window.location.origin : "";
     }
-    
+
     return `${baseUrl}/navigate?mapId=${encodeURIComponent(
       mapData.id
     )}&nodeId=${encodeURIComponent(selectedNode.id)}`;
@@ -891,6 +893,41 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
               </select>
             </div>
 
+            {/* Category / Type */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Category / Type
+              </label>
+              <select
+                value={editingNode.category || "none"}
+                onChange={(e) => {
+                  updateNode({ category: e.target.value });
+                  pushHistory();
+                }}
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+              >
+                <option value="none">None (Default)</option>
+                <option value="canteen">Canteen</option>
+                <option value="library">Library</option>
+                <option value="medical">Medical</option>
+                <option value="restroom_general">
+                  Restroom (Unisex/Common)
+                </option>
+                <option value="restroom_men">Restroom (Men)</option>
+                <option value="restroom_women">Restroom (Women)</option>
+                <option value="staff_room">Staff Room</option>
+                <option value="office_principal">Office - Principal</option>
+                <option value="office_chairman">Office - Chairman</option>
+                <option value="office_hod_cse">Office - HOD CSE</option>
+                <option value="office_hod_ece">Office - HOD ECE</option>
+                <option value="office_hod_mech">Office - HOD Mechanical</option>
+                <option value="office_hod_civil">Office - HOD Civil</option>
+                <option value="office_hod_it">Office - HOD IT</option>
+                <option value="ground">Ground (Playground/Gym)</option>
+                <option value="gate">Gate (Main Entrance/Exit)</option>
+              </select>
+            </div>
+
             {/* Gateway Config */}
             {editingNode.type === "GATEWAY" && (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
@@ -1138,21 +1175,21 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             {/* Address Type Selector */}
             <div className="flex gap-2">
               <button
-                onClick={() => setQrAddressType('localhost')}
+                onClick={() => setQrAddressType("localhost")}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  qrAddressType === 'localhost'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  qrAddressType === "localhost"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 Localhost
               </button>
               <button
-                onClick={() => setQrAddressType('network')}
+                onClick={() => setQrAddressType("network")}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  qrAddressType === 'network'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  qrAddressType === "network"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 Network (10.10.25.29)

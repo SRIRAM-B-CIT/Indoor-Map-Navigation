@@ -1,23 +1,30 @@
 // app/navigate/page.tsx
 "use client";
 
-import { useState, useCallback } from "react";
-import { ArrowLeft, RotateCcw, Home } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Navigation2, RotateCcw, Home, MapPin, Target } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import IndoorNavigation from "@/components/IndoorNavigation";
 import LocationSelector from "@/components/LocationSelector";
+import AIChatbot from "@/components/AIChatbot";
+import { getAllMaps } from "@/lib/mapService";
+import { generateNavigationPath } from "@/lib/pathfinder";
+import type { MapData } from "@/types/navigation";
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface LocationPoint {
+  mapId: string;
+  nodeId: string;
+}
+
 interface NavigationState {
+  startNode: LocationPoint | null;
+  endNode: LocationPoint | null;
   isNavigating: boolean;
-  startMapId: string;
-  startNodeId: string;
-  endMapId: string;
-  endNodeId: string;
 }
 
 // ============================================================================
@@ -27,62 +34,142 @@ interface NavigationState {
 export default function NavigatePage() {
   // Read URL query parameters for QR Code detection
   const searchParams = useSearchParams();
-  const initialMapId = searchParams.get("mapId");
-  const initialNodeId = searchParams.get("nodeId");
+  const qrMapId = searchParams.get("mapId");
+  const qrNodeId = searchParams.get("nodeId");
 
-  // Navigation state
+  // Navigation state (refactored)
   const [navState, setNavState] = useState<NavigationState>({
+    startNode: null,
+    endNode: null,
     isNavigating: false,
-    startMapId: "",
-    startNodeId: "",
-    endMapId: "",
-    endNodeId: "",
   });
 
-  // Handle navigation start from LocationSelector
-  const handleStartNavigation = useCallback(
+  // Maps data
+  const [allMaps, setAllMaps] = useState<MapData[]>([]);
+  const [isLoadingMaps, setIsLoadingMaps] = useState(true);
+
+  // Load all maps on mount
+  useEffect(() => {
+    const loadMaps = async () => {
+      try {
+        setIsLoadingMaps(true);
+        const maps = await getAllMaps();
+        setAllMaps(maps);
+      } catch (error) {
+        console.error("Failed to load maps:", error);
+      } finally {
+        setIsLoadingMaps(false);
+      }
+    };
+    loadMaps();
+  }, []);
+
+  // Set start node from QR code parameters
+  useEffect(() => {
+    if (qrMapId && qrNodeId && !navState.startNode) {
+      setNavState((prev) => ({
+        ...prev,
+        startNode: { mapId: qrMapId, nodeId: qrNodeId },
+      }));
+    }
+  }, [qrMapId, qrNodeId, navState.startNode]);
+
+  // Calculate distance between two nodes (using pathfinder)
+  const calculateDistance = useCallback(
+    async (from: LocationPoint, to: LocationPoint): Promise<number | null> => {
+      try {
+        const result = await generateNavigationPath(
+          from.mapId,
+          from.nodeId,
+          to.mapId,
+          to.nodeId
+        );
+        if (result.success) {
+          return result.totalNodes; // Use node count as distance metric
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    []
+  );
+
+  // Handle manual navigation start from LocationSelector
+  const handleManualSelection = useCallback(
     (
       startMapId: string,
       startNodeId: string,
       endMapId: string,
       endNodeId: string
     ) => {
-      setNavState({
-        isNavigating: true,
-        startMapId,
-        startNodeId,
-        endMapId,
-        endNodeId,
-      });
+      // Update both start and end nodes from manual selection
+      setNavState((prev) => ({
+        ...prev,
+        startNode: { mapId: startMapId, nodeId: startNodeId },
+        endNode: { mapId: endMapId, nodeId: endNodeId },
+      }));
     },
     []
   );
 
-  // Reset to selector view
+  // Handle chatbot destination selection (ONLY sets destination)
+  const handleBotSetDestination = useCallback(
+    async (destinationNodeId: string, destinationMapId: string) => {
+      // Simply set the end node - DO NOT change start node
+      // This will auto-fill the destination dropdown in LocationSelector
+      setNavState((prev) => ({
+        ...prev,
+        endNode: { mapId: destinationMapId, nodeId: destinationNodeId },
+      }));
+    },
+    []
+  );
+
+  // Start navigation (manual trigger)
+  const handleStartNavigation = useCallback(() => {
+    if (navState.startNode && navState.endNode) {
+      setNavState((prev) => ({ ...prev, isNavigating: true }));
+    }
+  }, [navState.startNode, navState.endNode]);
+
+  // Reset navigation
   const handleReset = useCallback(() => {
     setNavState({
+      startNode:
+        qrMapId && qrNodeId ? { mapId: qrMapId, nodeId: qrNodeId } : null,
+      endNode: null,
       isNavigating: false,
-      startMapId: "",
-      startNodeId: "",
-      endMapId: "",
-      endNodeId: "",
     });
-  }, []);
+  }, [qrMapId, qrNodeId]);
 
   // Handle navigation complete
   const handleNavigationComplete = useCallback(() => {
-    // Optional: Could auto-reset or show a completion message
     console.log("Navigation completed!");
   }, []);
 
   // Handle navigation error
   const handleNavigationError = useCallback((error: string) => {
     console.error("Navigation error:", error);
-    // Could show a toast or error UI
   }, []);
 
+  // Get node display name
+  const getNodeName = useCallback(
+    (location: LocationPoint | null): string => {
+      if (!location) return "Not selected";
+      const map = allMaps.find((m) => m.id === location.mapId);
+      const node = map?.nodes.find((n) => n.id === location.nodeId);
+      return node?.name || location.nodeId;
+    },
+    [allMaps]
+  );
+
+  // Check if navigation can start
+  const canStartNavigation =
+    navState.startNode && navState.endNode && !navState.isNavigating;
+
   // ============================================================================
-  // Render: Location Selector View
+  // Render: Setup View (Before Navigation Starts)
   // ============================================================================
 
   if (!navState.isNavigating) {
@@ -122,9 +209,12 @@ export default function NavigatePage() {
 
         {/* Location Selector */}
         <LocationSelector
-          onStartNavigation={handleStartNavigation}
-          initialStartMapId={initialMapId || undefined}
-          initialStartNodeId={initialNodeId || undefined}
+          onStartNavigation={handleManualSelection}
+          initialStartMapId={navState.startNode?.mapId}
+          initialStartNodeId={navState.startNode?.nodeId}
+          initialEndMapId={navState.endNode?.mapId}
+          initialEndNodeId={navState.endNode?.nodeId}
+          onNavigationTrigger={handleStartNavigation}
         />
 
         {/* Footer */}
@@ -133,60 +223,79 @@ export default function NavigatePage() {
             Indoor Navigation System • Multi-Map Routing
           </p>
         </div>
+
+        {/* AI Chatbot */}
+        {!isLoadingMaps && allMaps.length > 0 && (
+          <AIChatbot
+            onSetDestination={handleBotSetDestination}
+            allMaps={allMaps}
+            currentMapId={navState.startNode?.mapId}
+          />
+        )}
       </main>
     );
   }
 
   // ============================================================================
-  // Render: Navigation View
+  // Render: Active Navigation View
   // ============================================================================
 
   return (
     <main className="h-screen bg-gray-100 flex flex-col overflow-hidden">
-      {/* Top Bar - Compact on Mobile */}
+      {/* Top Bar */}
       <div className="bg-white border-b shadow-sm flex-shrink-0">
         <div className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base font-medium hidden sm:inline">
-              Back to Search
-            </span>
-            <span className="text-sm font-medium sm:hidden">Back</span>
-          </button>
-
-          <h1 className="text-sm sm:text-lg font-semibold text-gray-800">
-            Route Navigation
-          </h1>
-
           <button
             onClick={handleReset}
             className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">
-              New Route
-            </span>
-            <span className="text-sm font-medium sm:hidden">New</span>
+            <span className="text-sm font-medium">New Route</span>
           </button>
+
+          <div className="text-center">
+            <h1 className="text-sm sm:text-lg font-semibold text-gray-800">
+              Navigating to {getNodeName(navState.endNode)}
+            </h1>
+            <p className="text-xs text-gray-500">
+              From {getNodeName(navState.startNode)}
+            </p>
+          </div>
+
+          <Link
+            href="/"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:inline">Home</span>
+          </Link>
         </div>
       </div>
 
-      {/* Navigation Map Container - Full Viewport */}
+      {/* Navigation Map Container */}
       <div className="flex-1 overflow-hidden">
-        <IndoorNavigation
-          startMapId={navState.startMapId}
-          startNodeId={navState.startNodeId}
-          endMapId={navState.endMapId}
-          endNodeId={navState.endNodeId}
-          animationSpeed={1}
-          showLabels={true}
-          onComplete={handleNavigationComplete}
-          onError={handleNavigationError}
-        />
+        {navState.startNode && navState.endNode && (
+          <IndoorNavigation
+            startMapId={navState.startNode.mapId}
+            startNodeId={navState.startNode.nodeId}
+            endMapId={navState.endNode.mapId}
+            endNodeId={navState.endNode.nodeId}
+            animationSpeed={1}
+            showLabels={true}
+            onComplete={handleNavigationComplete}
+            onError={handleNavigationError}
+          />
+        )}
       </div>
+
+      {/* AI Chatbot - Change destination during navigation */}
+      {!isLoadingMaps && allMaps.length > 0 && (
+        <AIChatbot
+          onSetDestination={handleBotSetDestination}
+          allMaps={allMaps}
+          currentMapId={navState.startNode?.mapId}
+        />
+      )}
     </main>
   );
 }

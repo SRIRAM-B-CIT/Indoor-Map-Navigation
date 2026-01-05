@@ -43,6 +43,8 @@ export interface Node {
   name: string;
   /** Optional description or additional info */
   description?: string;
+  /** Category/type for chatbot intent matching */
+  category?: string;
   /** Gateway configuration - required when type is 'GATEWAY' */
   gatewayConfig?: GatewayConfig;
 }

@@ -30,6 +30,9 @@ interface LocationSelectorProps {
   ) => void;
   initialStartMapId?: string;
   initialStartNodeId?: string;
+  initialEndMapId?: string;
+  initialEndNodeId?: string;
+  onNavigationTrigger?: () => void;
 }
 
 interface SearchOption {
@@ -309,6 +312,9 @@ export default function LocationSelector({
   onStartNavigation,
   initialStartMapId,
   initialStartNodeId,
+  initialEndMapId,
+  initialEndNodeId,
+  onNavigationTrigger,
 }: LocationSelectorProps) {
   // Data state
   const [isLoading, setIsLoading] = useState(true);
@@ -339,6 +345,22 @@ export default function LocationSelector({
       setIsStartLockedByQR(true);
     }
   }, [initialStartMapId, initialStartNodeId, allOptions, startLocation]);
+
+  // Auto-set end location from chatbot
+  useEffect(() => {
+    if (!initialEndMapId || !initialEndNodeId || allOptions.length === 0) {
+      return;
+    }
+
+    // Find matching option
+    const matchingOption = allOptions.find(
+      (opt) => opt.mapId === initialEndMapId && opt.nodeId === initialEndNodeId
+    );
+
+    if (matchingOption) {
+      setEndLocation(matchingOption);
+    }
+  }, [initialEndMapId, initialEndNodeId, allOptions]);
 
   // Fetch all maps and flatten to search options
   useEffect(() => {
@@ -415,12 +437,17 @@ export default function LocationSelector({
   // Handle navigation start
   const handleStartNavigation = () => {
     if (isValid && startLocation && endLocation) {
+      // First update parent state with selection
       onStartNavigation(
         startLocation.mapId,
         startLocation.nodeId,
         endLocation.mapId,
         endLocation.nodeId
       );
+      // Then trigger navigation if callback provided
+      if (onNavigationTrigger) {
+        onNavigationTrigger();
+      }
     }
   };
 

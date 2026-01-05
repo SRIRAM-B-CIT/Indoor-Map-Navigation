@@ -70,6 +70,11 @@ const NodeSchema = new Schema(
       type: String,
       required: false,
     },
+    category: {
+      type: String,
+      required: false,
+      default: "none",
+    },
     gatewayConfig: {
       type: GatewayConfigSchema,
       required: false,
