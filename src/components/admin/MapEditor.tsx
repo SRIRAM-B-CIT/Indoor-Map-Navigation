@@ -23,6 +23,7 @@ import { QRCodeSVG } from "qrcode.react";
 import type { MapData, Node, Edge, NodeType } from "@/types/navigation";
 import { useImageDimensions } from "@/hooks/useImageDimensions";
 import PinVerificationModal from "@/components/PinVerificationModal";
+import { getMapImageSrc } from "@/lib/imageUtils";
 
 // ============================================================================
 // Types
@@ -78,11 +79,14 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Get effective image source (mapImage for new maps, imageUrl for old maps)
+  const effectiveImageSrc = getMapImageSrc(mapData.mapImage, mapData.imageUrl);
+
   // Use the image dimensions hook for accurate coordinate conversion
   const { imageBounds, isReady, toPixels, toPercent } = useImageDimensions(
     containerRef,
-    mapData.imageUrl,
-    "top-left" // background-position: top left
+    effectiveImageSrc,
+    "top-left", // background-position: top left
   );
 
   // Helper to convert percentage to SVG-local coordinates
@@ -93,7 +97,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
         y: (percentY / 100) * imageBounds.height,
       };
     },
-    [imageBounds.width, imageBounds.height]
+    [imageBounds.width, imageBounds.height],
   );
 
   // Helper to convert click position to percentage
@@ -113,13 +117,13 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
         y: (pixelY / imageBounds.height) * 100,
       };
     },
-    [imageBounds]
+    [imageBounds],
   );
 
   // Editor state
   const [nodes, setNodes] = useState<Node[]>(mapData.nodes || []);
   const [adjacencyList, setAdjacencyList] = useState<Record<string, Edge[]>>(
-    mapData.adjacencyList || {}
+    mapData.adjacencyList || {},
   );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
@@ -166,7 +170,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
         const result = await response.json();
         if (result.success) {
           setAvailableMaps(
-            result.data.filter((m: { id: string }) => m.id !== mapData.id)
+            result.data.filter((m: { id: string }) => m.id !== mapData.id),
           );
         }
       } catch (err) {
@@ -276,7 +280,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
 
       setTimeout(() => pushHistory(), 0);
     },
-    [mode, clickToPercent, nodes.length, pushHistory]
+    [mode, clickToPercent, nodes.length, pushHistory],
   );
 
   // Handle node click
@@ -298,7 +302,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
         setEditingNode(node);
       }
     },
-    [mode, connectSourceId]
+    [mode, connectSourceId],
   );
 
   // Toggle edge between two nodes
@@ -310,14 +314,14 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
         // Check if edge exists
         const fromEdges = newList[fromId] || [];
         const existingEdgeIndex = fromEdges.findIndex(
-          (e) => e.targetNodeId === toId
+          (e) => e.targetNodeId === toId,
         );
 
         if (existingEdgeIndex >= 0) {
           // Remove edge (both directions)
           newList[fromId] = fromEdges.filter((e) => e.targetNodeId !== toId);
           newList[toId] = (newList[toId] || []).filter(
-            (e) => e.targetNodeId !== fromId
+            (e) => e.targetNodeId !== fromId,
           );
         } else {
           // Add edge (both directions)
@@ -334,7 +338,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
 
       setTimeout(() => pushHistory(), 0);
     },
-    [pushHistory]
+    [pushHistory],
   );
 
   // Calculate distance between two nodes
@@ -348,7 +352,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
       const dy = node2.y - node1.y;
       return Math.round(Math.sqrt(dx * dx + dy * dy));
     },
-    [nodes]
+    [nodes],
   );
 
   // Handle node drag start
@@ -359,7 +363,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
       setIsDragging(true);
       setDragNodeId(nodeId);
     },
-    [mode]
+    [mode],
   );
 
   // Handle mouse move for dragging
@@ -382,11 +386,11 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
                 x: Math.round(clampedX * 100) / 100,
                 y: Math.round(clampedY * 100) / 100,
               }
-            : node
-        )
+            : node,
+        ),
       );
     },
-    [isDragging, dragNodeId, clickToPercent]
+    [isDragging, dragNodeId, clickToPercent],
   );
 
   // Handle mouse up to stop dragging
@@ -409,7 +413,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
       // Remove edges pointing to deleted node
       Object.keys(newList).forEach((key) => {
         newList[key] = newList[key].filter(
-          (e) => e.targetNodeId !== selectedNodeId
+          (e) => e.targetNodeId !== selectedNodeId,
         );
       });
       return newList;
@@ -427,11 +431,11 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
 
       const updatedNode = { ...editingNode, ...updates };
       setNodes((prev) =>
-        prev.map((n) => (n.id === editingNode.id ? updatedNode : n))
+        prev.map((n) => (n.id === editingNode.id ? updatedNode : n)),
       );
       setEditingNode(updatedNode);
     },
-    [editingNode]
+    [editingNode],
   );
 
   // Save changes - prompt for PIN
@@ -484,7 +488,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
     return `${baseUrl}/navigate?mapId=${encodeURIComponent(
-      mapData.id
+      mapData.id,
     )}&nodeId=${encodeURIComponent(selectedNode.id)}`;
   }, [selectedNode, mapData.id]);
 
@@ -613,8 +617,8 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             !showNodesAndEdges
               ? "opacity-50 cursor-not-allowed text-gray-400"
               : mode === "select"
-              ? "bg-blue-100 text-blue-600"
-              : "hover:bg-gray-100 text-gray-600"
+                ? "bg-blue-100 text-blue-600"
+                : "hover:bg-gray-100 text-gray-600"
           }`}
           title="Select & Move (S)"
         >
@@ -630,8 +634,8 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             !showNodesAndEdges
               ? "opacity-50 cursor-not-allowed text-gray-400"
               : mode === "add"
-              ? "bg-green-100 text-green-600"
-              : "hover:bg-gray-100 text-gray-600"
+                ? "bg-green-100 text-green-600"
+                : "hover:bg-gray-100 text-gray-600"
           }`}
           title="Add Node (A) - Double-click to place"
         >
@@ -647,8 +651,8 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             !showNodesAndEdges
               ? "opacity-50 cursor-not-allowed text-gray-400"
               : mode === "connect"
-              ? "bg-purple-100 text-purple-600"
-              : "hover:bg-gray-100 text-gray-600"
+                ? "bg-purple-100 text-purple-600"
+                : "hover:bg-gray-100 text-gray-600"
           }`}
           title="Connect Nodes (C) - Click two nodes"
         >
@@ -737,8 +741,8 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             minHeight: "800px",
             width: "max-content",
             height: "max-content",
-            backgroundImage: mapData.imageUrl
-              ? `url(${mapData.imageUrl})`
+            backgroundImage: effectiveImageSrc
+              ? `url(${effectiveImageSrc})`
               : undefined,
             backgroundSize: "contain",
             backgroundRepeat: "no-repeat",
@@ -750,7 +754,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
           onMouseLeave={handleMouseUp}
         >
           {/* No Image Placeholder */}
-          {!mapData.imageUrl && (
+          {!effectiveImageSrc && (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
               <div className="text-center">
                 <MapPin className="w-16 h-16 mx-auto mb-2 opacity-30" />
@@ -828,7 +832,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
               {connectSourceId &&
                 (() => {
                   const sourceNode = nodes.find(
-                    (n) => n.id === connectSourceId
+                    (n) => n.id === connectSourceId,
                   );
                   if (!sourceNode) return null;
                   const sourcePos = toSvgCoords(sourceNode.x, sourceNode.y);
@@ -1186,7 +1190,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
                 ) : (
                   (adjacencyList[editingNode.id] || []).map((edge) => {
                     const targetNode = nodes.find(
-                      (n) => n.id === edge.targetNodeId
+                      (n) => n.id === edge.targetNodeId,
                     );
                     return (
                       <div
@@ -1227,7 +1231,7 @@ export default function MapEditor({ mapData, onMapUpdate }: MapEditorProps) {
             <span>
               {Object.values(adjacencyList).reduce(
                 (sum, edges) => sum + edges.length,
-                0
+                0,
               ) / 2}{" "}
               edges
             </span>

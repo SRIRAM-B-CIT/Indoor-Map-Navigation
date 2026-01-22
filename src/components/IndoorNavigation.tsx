@@ -28,6 +28,7 @@ import {
   getPointAtProgress,
   calculateAngle,
 } from "@/hooks/useImageDimensions";
+import { getMapImageSrc } from "@/lib/imageUtils";
 
 // Types
 
@@ -298,7 +299,7 @@ export default function IndoorNavigation({
   // This fixes the "drifting coordinates" bug when image aspect ratio differs from container
   const { imageBounds, isReady, toPixels } = useImageDimensions(
     containerRef,
-    currentMapData?.imageUrl,
+    getMapImageSrc(currentMapData?.mapImage, currentMapData?.imageUrl),
     "top-left", // Our background-position is top-left
   );
 
@@ -866,8 +867,11 @@ export default function IndoorNavigation({
             minHeight: "800px",
             width: Math.max(imageBounds.containerWidth || 1200, 1200),
             height: Math.max(imageBounds.containerHeight || 800, 800),
-            backgroundImage: currentMapData?.imageUrl
-              ? `url(${currentMapData.imageUrl})`
+            backgroundImage: getMapImageSrc(
+              currentMapData?.mapImage,
+              currentMapData?.imageUrl,
+            )
+              ? `url(${getMapImageSrc(currentMapData?.mapImage, currentMapData?.imageUrl)})`
               : undefined,
             backgroundSize: "contain",
             backgroundRepeat: "no-repeat",

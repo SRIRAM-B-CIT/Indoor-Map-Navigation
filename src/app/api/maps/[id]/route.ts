@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           success: false,
           error: `Map '${id}' not found`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to fetch map",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           success: false,
           error: "Invalid or missing PIN",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -77,13 +77,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           success: false,
           error: `Map '${id}' not found`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Update fields
     if (body.name !== undefined) existingMap.name = body.name;
     if (body.imageUrl !== undefined) existingMap.imageUrl = body.imageUrl;
+    if (body.mapImage !== undefined) existingMap.mapImage = body.mapImage;
     if (body.nodes !== undefined) existingMap.nodes = body.nodes;
     if (body.adjacencyList !== undefined) {
       existingMap.adjacencyList = toMongooseAdjacencyList(body.adjacencyList);
@@ -102,7 +103,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to update map",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -127,7 +128,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
           success: false,
           error: "Invalid or missing PIN",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -139,7 +140,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
           success: false,
           error: `Map '${id}' not found`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -154,7 +155,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to delete map",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
