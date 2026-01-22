@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 import {
   Plus,
   Map,
@@ -13,6 +14,7 @@ import {
   Image as ImageIcon,
   Home,
   MapPin,
+  LogOut,
 } from "lucide-react";
 import type { MapData } from "@/types/navigation";
 
@@ -21,6 +23,7 @@ import type { MapData } from "@/types/navigation";
  * Displays all maps and allows creating new ones
  */
 export default function AdminPage() {
+  const { data: session } = useSession();
   const [maps, setMaps] = useState<MapData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -211,16 +214,31 @@ export default function AdminPage() {
                 </h1>
                 <p className="text-sm text-slate-400">
                   Manage indoor navigation maps
+                  {session?.user?.name && (
+                    <span className="ml-2">
+                      • Logged in as {session.user.name}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 font-semibold"
-            >
-              <Plus className="w-5 h-5" />
-              Create New Map
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 font-semibold"
+              >
+                <Plus className="w-5 h-5" />
+                Create New Map
+              </button>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 text-slate-300 rounded-xl hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-all duration-300 font-medium"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>
