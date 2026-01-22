@@ -14,15 +14,14 @@ export default function LandingPage() {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto">
-        {/* Logo/Icon */}
-        <div className="mb-8 flex justify-center">
-          <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30">
-              <Navigation className="w-12 h-12 text-white" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg">
-              <MapPin className="w-4 h-4 text-white" />
-            </div>
+        {/* Logo */}
+        <div className="flex justify-center mb-8 animate-fadeInUp delay-100">
+          <div className="w-40 h-40 sm:w-48 sm:h-48">
+            <img
+              src="/home-logo.png"
+              alt="Indoor Navigation Logo"
+              className="w-full h-full object-contain drop-shadow-lg hover:scale-110 transition-transform duration-500"
+            />
           </div>
         </div>
 
