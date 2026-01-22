@@ -295,6 +295,9 @@ export default function IndoorNavigation({
   const startTimeRef = useRef<number | null>(null);
   const baseDurationRef = useRef(0);
 
+  // Map image loading state - prevents race condition where path appears before map
+  const [isMapImageLoaded, setIsMapImageLoaded] = useState(false);
+
   // Use the new image dimensions hook - calculates ACTUAL rendered image size
   // This fixes the "drifting coordinates" bug when image aspect ratio differs from container
   const { imageBounds, isReady, toPixels } = useImageDimensions(
@@ -302,6 +305,36 @@ export default function IndoorNavigation({
     getMapImageSrc(currentMapData?.mapImage, currentMapData?.imageUrl),
     "top-left", // Our background-position is top-left
   );
+
+  // Preload map image and track when it's ready
+  useEffect(() => {
+    const imageSrc = getMapImageSrc(
+      currentMapData?.mapImage,
+      currentMapData?.imageUrl,
+    );
+    if (!imageSrc) {
+      setIsMapImageLoaded(false);
+      return;
+    }
+
+    // Reset loading state when image source changes
+    setIsMapImageLoaded(false);
+
+    const img = new Image();
+    img.onload = () => {
+      setIsMapImageLoaded(true);
+    };
+    img.onerror = () => {
+      // Still set as loaded to show error state rather than infinite spinner
+      setIsMapImageLoaded(true);
+    };
+    img.src = imageSrc;
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [currentMapData?.mapImage, currentMapData?.imageUrl]);
 
   // Current segment
   const currentSegment = useMemo(() => {
@@ -860,7 +893,9 @@ export default function IndoorNavigation({
         {/* Large Content Wrapper - Forces Scroll on Mobile */}
         <div
           ref={containerRef}
-          className="relative bg-gradient-to-br from-slate-200 to-slate-300"
+          className={`relative bg-gradient-to-br from-slate-200 to-slate-300 transition-opacity duration-500 ${
+            isMapImageLoaded ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             // Large minimum dimensions to trigger scrolling on mobile
             minWidth: "1200px",
@@ -878,8 +913,19 @@ export default function IndoorNavigation({
             backgroundPosition: "top left",
           }}
         >
+          {/* Map Image Loading Spinner - shown until image is fully loaded */}
+          {!isMapImageLoaded && status !== "LOADING" && status !== "IDLE" && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-200 z-20">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                <p className="text-slate-600 font-medium">Loading map...</p>
+              </div>
+            </div>
+          )}
+
           {/* SVG Overlay - positioned and sized to match ACTUAL rendered image */}
-          {isReady && (
+          {/* Only render when both dimensions are ready AND map image is loaded */}
+          {isReady && isMapImageLoaded && (
             <svg
               className="absolute pointer-events-none"
               style={{

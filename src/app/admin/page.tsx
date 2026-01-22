@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import imageCompression from "browser-image-compression";
 import {
   Plus,
   Map,
@@ -77,7 +78,7 @@ export default function AdminPage() {
     }
   };
 
-  // Handle file selection and convert to Base64
+  // Handle file selection, compress, and convert to Base64
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -87,8 +88,18 @@ export default function AdminPage() {
     setSelectedFileName(file.name);
 
     try {
-      // Convert file to Base64 using utility function
-      const result = await fileToBase64(file);
+      // Step 1: Compress the image automatically
+      const compressionOptions = {
+        maxSizeMB: 1.0, // Target 1MB or less
+        maxWidthOrHeight: 2500, // Resize large images to 2500px max
+        useWebWorker: true, // Use web worker to prevent UI freeze
+        fileType: "image/webp", // Convert to WebP for better compression
+      };
+
+      const compressedFile = await imageCompression(file, compressionOptions);
+
+      // Step 2: Convert compressed file to Base64 using utility function
+      const result = await fileToBase64(compressedFile);
 
       if (result.success) {
         setNewMapImage(result.base64);
@@ -98,10 +109,12 @@ export default function AdminPage() {
         setNewMapImage("");
       }
     } catch (err) {
-      setUploadError("Failed to process file");
+      setUploadError(
+        err instanceof Error ? err.message : "Failed to process file",
+      );
       setSelectedFileName(null);
       setNewMapImage("");
-      console.error(err);
+      console.error("Image compression error:", err);
     } finally {
       setIsUploading(false);
     }
