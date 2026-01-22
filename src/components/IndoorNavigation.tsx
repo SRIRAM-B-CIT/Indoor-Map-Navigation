@@ -299,7 +299,7 @@ export default function IndoorNavigation({
   const { imageBounds, isReady, toPixels } = useImageDimensions(
     containerRef,
     currentMapData?.imageUrl,
-    "top-left" // Our background-position is top-left
+    "top-left", // Our background-position is top-left
   );
 
   // Current segment
@@ -326,7 +326,7 @@ export default function IndoorNavigation({
         y: (percentY / 100) * imageBounds.height,
       };
     },
-    [imageBounds.width, imageBounds.height]
+    [imageBounds.width, imageBounds.height],
   );
 
   // Path pixel coordinates (relative to SVG viewBox)
@@ -344,7 +344,7 @@ export default function IndoorNavigation({
     if (pathPixelCoords.length < 2) return 0;
     const idx = Math.min(
       Math.floor(progress * (pathPixelCoords.length - 1)),
-      pathPixelCoords.length - 2
+      pathPixelCoords.length - 2,
     );
     return calculateAngle(pathPixelCoords[idx], pathPixelCoords[idx + 1]);
   }, [pathPixelCoords, progress]);
@@ -368,7 +368,7 @@ export default function IndoorNavigation({
           startMapId,
           startNodeId,
           endMapId,
-          endNodeId
+          endNodeId,
         );
 
         if (cancelled) return;
@@ -655,11 +655,11 @@ export default function IndoorNavigation({
       if (pathNodes.length === 0) return "Preparing route...";
       const currentNodeIndex = Math.min(
         Math.floor(progress * (pathNodes.length - 1)),
-        pathNodes.length - 1
+        pathNodes.length - 1,
       );
       const nextNodeIndex = Math.min(
         currentNodeIndex + 1,
-        pathNodes.length - 1
+        pathNodes.length - 1,
       );
       const nextNode = pathNodes[nextNodeIndex];
       if (progress >= 0.95) {
@@ -710,12 +710,12 @@ export default function IndoorNavigation({
                 status === "COMPLETED"
                   ? "bg-green-100"
                   : status === "ERROR"
-                  ? "bg-red-100"
-                  : status === "WAITING_AT_GATEWAY"
-                  ? "bg-amber-100"
-                  : status === "LOADING"
-                  ? "bg-gray-100"
-                  : "bg-blue-100"
+                    ? "bg-red-100"
+                    : status === "WAITING_AT_GATEWAY"
+                      ? "bg-amber-100"
+                      : status === "LOADING"
+                        ? "bg-gray-100"
+                        : "bg-blue-100"
               }`}
             >
               {status === "COMPLETED" ? (
@@ -785,12 +785,12 @@ export default function IndoorNavigation({
                 status === "NAVIGATING"
                   ? "bg-blue-100 text-blue-700"
                   : status === "COMPLETED"
-                  ? "bg-green-100 text-green-700"
-                  : status === "ERROR"
-                  ? "bg-red-100 text-red-700"
-                  : status === "WAITING_AT_GATEWAY"
-                  ? "bg-amber-100 text-amber-700"
-                  : "bg-gray-100 text-gray-700"
+                    ? "bg-green-100 text-green-700"
+                    : status === "ERROR"
+                      ? "bg-red-100 text-red-700"
+                      : status === "WAITING_AT_GATEWAY"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-gray-100 text-gray-700"
               }`}
             >
               {status === "WAITING_AT_GATEWAY" ? "AT GATEWAY" : status}
@@ -808,8 +808,8 @@ export default function IndoorNavigation({
                 status === "COMPLETED"
                   ? "bg-green-500"
                   : status === "WAITING_AT_GATEWAY"
-                  ? "bg-amber-500"
-                  : "bg-blue-500"
+                    ? "bg-amber-500"
+                    : "bg-blue-500"
               }`}
               style={{ width: `${progress * 100}%` }}
               transition={{ duration: 0.1 }}
