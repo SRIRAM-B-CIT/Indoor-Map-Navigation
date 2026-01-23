@@ -290,7 +290,7 @@ export default function IndoorNavigation({
 
   // Playback control state
   const [isPaused, setIsPaused] = useState(false);
-  const [speedMultiplier, setSpeedMultiplier] = useState(1); // 1x or 2x
+  const [speedMultiplier, setSpeedMultiplier] = useState(1); // 1x, 2x, or 4x
   const pausedProgressRef = useRef(0); // Store progress when paused
   const startTimeRef = useRef<number | null>(null);
   const baseDurationRef = useRef(0);
@@ -497,7 +497,7 @@ export default function IndoorNavigation({
 
     setIsAnimating(true);
     const pathLength = calculatePathLength(pathPixelCoords);
-    const baseDuration = pathLength / 20; // pixels per second
+    const baseDuration = pathLength / 25; // pixels per second
     baseDurationRef.current = baseDuration;
     const duration = baseDuration / (animationSpeed * speedMultiplier);
 
@@ -662,7 +662,11 @@ export default function IndoorNavigation({
   }, []);
 
   const handleToggleSpeed = useCallback(() => {
-    setSpeedMultiplier((prev) => (prev === 1 ? 3 : 1));
+    setSpeedMultiplier((prev) => {
+      if (prev === 1) return 2;
+      if (prev === 2) return 4;
+      return 1;
+    });
   }, []);
 
   // ============================================================================
@@ -740,7 +744,7 @@ export default function IndoorNavigation({
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             {/* Status Icon */}
             <div
-              className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${
+              className={`shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${
                 status === "COMPLETED"
                   ? "bg-green-100"
                   : status === "ERROR"
@@ -782,14 +786,31 @@ export default function IndoorNavigation({
           </div>
 
           {/* Right: Action Buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Gateway: Continue Button */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Gateway: Continue Button with Pulsing Blue Glow and Zoom effect */}
             {status === "WAITING_AT_GATEWAY" && (
               <motion.button
                 initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                animate={{
+                  scale: [1, 1.1, 1], // The "zoom in zoom out" effect
+                  opacity: 1,
+                  boxShadow: [
+                    "0 0 0px rgba(59, 130, 246, 0)",
+                    "0 0 20px rgba(59, 130, 246, 0.8)", // The blue light glow
+                    "0 0 0px rgba(59, 130, 246, 0)",
+                  ],
+                }}
+                transition={{
+                  scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+                  boxShadow: {
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                  opacity: { duration: 0.3 },
+                }}
                 onClick={handleContinueToNextMap}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/30"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors z-50 relative shadow-lg"
               >
                 <LogIn className="w-4 h-4" />
                 <span>
@@ -893,7 +914,7 @@ export default function IndoorNavigation({
         {/* Large Content Wrapper - Forces Scroll on Mobile */}
         <div
           ref={containerRef}
-          className={`relative bg-gradient-to-br from-slate-200 to-slate-300 transition-opacity duration-500 ${
+          className={`relative bg-linear-to-br from-slate-200 to-slate-300 transition-opacity duration-500 ${
             isMapImageLoaded ? "opacity-100" : "opacity-0"
           }`}
           style={{
@@ -1036,7 +1057,7 @@ export default function IndoorNavigation({
               {/* Restart Button - Touch Friendly */}
               <button
                 onClick={handleRestartSegment}
-                className="p-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors flex items-center justify-center"
+                className="p-3 min-h-11 min-w-11 rounded-xl hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors flex items-center justify-center"
                 title="Restart segment"
               >
                 <RotateCcw className="w-5 h-5" />
@@ -1045,7 +1066,7 @@ export default function IndoorNavigation({
               {/* Play/Pause Button - Large and Center */}
               <button
                 onClick={handlePlayPause}
-                className={`p-4 min-h-[56px] min-w-[56px] rounded-2xl transition-all flex items-center justify-center ${
+                className={`p-4 min-h-14 min-w-14 rounded-2xl transition-all flex items-center justify-center ${
                   isPaused
                     ? "bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -1062,15 +1083,24 @@ export default function IndoorNavigation({
               {/* Speed Toggle Button - Touch Friendly */}
               <button
                 onClick={handleToggleSpeed}
-                className={`flex items-center gap-1 px-4 py-3 min-h-[44px] rounded-xl text-sm font-semibold transition-all ${
-                  speedMultiplier === 3
-                    ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className={`flex items-center gap-1 px-4 py-3 min-h-11 rounded-xl text-sm font-semibold transition-all ${
+                  speedMultiplier === 4
+                    ? "bg-red-100 text-red-700 hover:bg-red-200"
+                    : speedMultiplier === 2
+                      ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Toggle speed"
               >
                 <Gauge className="w-4 h-4" />
-                <span>{speedMultiplier === 3 ? "2" : "1"}x</span>
+                <span>
+                  {speedMultiplier === 4
+                    ? "3"
+                    : speedMultiplier === 2
+                      ? "2"
+                      : "1"}
+                  x
+                </span>
               </button>
             </div>
           </motion.div>
@@ -1091,7 +1121,7 @@ export default function IndoorNavigation({
             }}
             className="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none px-4"
           >
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-2xl shadow-2xl">
+            <div className="flex items-center gap-3 px-6 py-4 bg-linear-to-r from-amber-400 to-amber-500 text-white rounded-2xl shadow-2xl">
               <LogIn className="w-6 h-6" />
               <div>
                 <p className="text-sm text-amber-50">
@@ -1114,7 +1144,7 @@ export default function IndoorNavigation({
             }}
             className="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none px-4"
           >
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-2xl shadow-2xl">
+            <div className="flex items-center gap-3 px-6 py-4 bg-linear-to-r from-green-400 to-green-500 text-white rounded-2xl shadow-2xl">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 0.6, repeat: Infinity }}

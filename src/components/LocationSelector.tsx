@@ -26,7 +26,7 @@ interface LocationSelectorProps {
     startMapId: string,
     startNodeId: string,
     endMapId: string,
-    endNodeId: string
+    endNodeId: string,
   ) => void;
   initialStartMapId?: string;
   initialStartNodeId?: string;
@@ -120,7 +120,7 @@ function SearchableSelect({
         (opt) =>
           opt.nodeName.toLowerCase().includes(query) ||
           opt.mapName.toLowerCase().includes(query) ||
-          opt.label.toLowerCase().includes(query)
+          opt.label.toLowerCase().includes(query),
       );
     }
 
@@ -162,7 +162,7 @@ function SearchableSelect({
       setIsOpen(false);
       setSearchQuery("");
     },
-    [onChange]
+    [onChange],
   );
 
   // Handle clear selection
@@ -172,7 +172,7 @@ function SearchableSelect({
       onChange(null);
       setSearchQuery("");
     },
-    [onChange]
+    [onChange],
   );
 
   // Handle input focus
@@ -280,8 +280,8 @@ function SearchableSelect({
                             option.type === "ROOM"
                               ? "bg-blue-100 text-blue-600"
                               : option.type === "GATEWAY"
-                              ? "bg-amber-100 text-amber-600"
-                              : "bg-gray-100 text-gray-600"
+                                ? "bg-amber-100 text-amber-600"
+                                : "bg-gray-100 text-gray-600"
                           }`}
                         >
                           <Icon className="w-4 h-4" />
@@ -343,14 +343,14 @@ export default function LocationSelector({
     // Find matching option
     const matchingOption = allOptions.find(
       (opt) =>
-        opt.mapId === initialStartMapId && opt.nodeId === initialStartNodeId
+        opt.mapId === initialStartMapId && opt.nodeId === initialStartNodeId,
     );
 
-    if (matchingOption && !startLocation) {
+    if (matchingOption) {
       setStartLocation(matchingOption);
       setIsStartLockedByQR(true);
     }
-  }, [initialStartMapId, initialStartNodeId, allOptions, startLocation]);
+  }, [initialStartMapId, initialStartNodeId, allOptions]);
 
   // Auto-set end location from chatbot
   useEffect(() => {
@@ -360,7 +360,7 @@ export default function LocationSelector({
 
     // Find matching option
     const matchingOption = allOptions.find(
-      (opt) => opt.mapId === initialEndMapId && opt.nodeId === initialEndNodeId
+      (opt) => opt.mapId === initialEndMapId && opt.nodeId === initialEndNodeId,
     );
 
     if (matchingOption) {
@@ -389,7 +389,7 @@ export default function LocationSelector({
             const mapResponse = await fetch(`/api/maps/${mapMeta.id}`);
             const mapResult = await mapResponse.json();
             return mapResult.success ? mapResult.data : null;
-          })
+          }),
         );
 
         // Flatten to SearchOption array (include ALL nodes for QR code matching)
@@ -448,7 +448,7 @@ export default function LocationSelector({
         startLocation.mapId,
         startLocation.nodeId,
         endLocation.mapId,
-        endLocation.nodeId
+        endLocation.nodeId,
       );
       // Then trigger navigation if callback provided
       if (onNavigationTrigger) {

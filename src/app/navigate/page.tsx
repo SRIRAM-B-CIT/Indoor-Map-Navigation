@@ -140,7 +140,7 @@ function NavigatePageContent() {
           from.mapId,
           from.nodeId,
           to.mapId,
-          to.nodeId
+          to.nodeId,
         );
         if (result.success) {
           return result.totalNodes; // Use node count as distance metric
@@ -150,7 +150,7 @@ function NavigatePageContent() {
         return null;
       }
     },
-    []
+    [],
   );
 
   // Handle manual navigation start from LocationSelector
@@ -159,7 +159,7 @@ function NavigatePageContent() {
       startMapId: string,
       startNodeId: string,
       endMapId: string,
-      endNodeId: string
+      endNodeId: string,
     ) => {
       // Update both start and end nodes from manual selection
       setNavState((prev) => ({
@@ -170,7 +170,7 @@ function NavigatePageContent() {
         isNavigating: true,
       }));
     },
-    []
+    [],
   );
 
   // Handle chatbot destination selection (ONLY sets destination)
@@ -183,7 +183,7 @@ function NavigatePageContent() {
         endNode: { mapId: destinationMapId, nodeId: destinationNodeId },
       }));
     },
-    []
+    [],
   );
 
   // Handle chatbot location selection (sets starting location)
@@ -195,7 +195,7 @@ function NavigatePageContent() {
         startNode: { mapId, nodeId },
       }));
     },
-    []
+    [],
   );
 
   // Start navigation (manual trigger)
@@ -236,7 +236,7 @@ function NavigatePageContent() {
       const node = map?.nodes.find((n) => n.id === location.nodeId);
       return node?.name || location.nodeId;
     },
-    [allMaps]
+    [allMaps],
   );
 
   // Check if navigation can start
@@ -282,18 +282,17 @@ function NavigatePageContent() {
 
           {/* Header */}
           <div className="text-center mb-6 sm:mb-12 animate-fadeInUp delay-200">
-            <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4">
-              Smart Navigation
+            <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 tracking-wider">
+              NAVX SMART INDOOR NAVIGATION
             </h1>
             <p className="text-sm sm:text-lg text-slate-400">
-              Find your way around the indoor spaces with ease
+              Find your way around the indoor spaces with NavX
             </p>
           </div>
 
           {/* Location Selector */}
           <div className="animate-fadeInUp delay-300">
             <LocationSelector
-              key={`${navState.startNode?.mapId}-${navState.startNode?.nodeId}-${navState.endNode?.mapId}-${navState.endNode?.nodeId}`}
               onStartNavigation={handleManualSelection}
               initialStartMapId={navState.startNode?.mapId}
               initialStartNodeId={navState.startNode?.nodeId}
@@ -304,9 +303,10 @@ function NavigatePageContent() {
           </div>
 
           {/* Footer */}
-          <div className="mt-8 sm:mt-12 text-center animate-fadeInUp delay-400">
-            <p className="text-xs sm:text-sm text-slate-500">
-              Indoor Navigation System • Multi-Map Routing with AI
+          <div className="pt-4 pb-4 text-center relative z-10 px-4 sm:px-0 pr-20 sm:pr-0">
+            <p className="text-slate-500 text-[10px] sm:text-sm font-medium tracking-wide leading-relaxed">
+              Developed by Sriram B, Subham Sahoo S, Thejas SB{" "}
+              <br className="sm:hidden" /> @ Techsprint GDGoC-CIT
             </p>
           </div>
 
