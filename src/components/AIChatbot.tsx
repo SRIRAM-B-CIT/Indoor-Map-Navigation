@@ -95,13 +95,16 @@ export default function AIChatbot({
 
     for (const map of allMaps) {
       for (const node of map.nodes) {
-        locations.push({
-          nodeId: node.id,
-          mapId: map.id,
-          nodeName: node.name,
-          mapName: map.name,
-          type: node.type,
-        });
+        // Filter out nodes with names like "Node 1", "Node 2", etc.
+        if (!/^Node\s+\d+$/i.test(node.name.trim())) {
+          locations.push({
+            nodeId: node.id,
+            mapId: map.id,
+            nodeName: node.name,
+            mapName: map.name,
+            type: node.type,
+          });
+        }
       }
     }
     return locations;

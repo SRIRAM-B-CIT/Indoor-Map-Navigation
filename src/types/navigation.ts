@@ -141,3 +141,33 @@ export function isValidNode(node: Node): boolean {
     node.type !== "GATEWAY" || node.gatewayConfig !== undefined;
   return coordValid && gatewayValid;
 }
+
+/**
+ * Location point representing a specific node on a specific map
+ */
+export interface LocationPoint {
+  mapId: string;
+  nodeId: string;
+}
+
+/**
+ * Navigation state tracking start and end points and navigation status
+ */
+export interface NavigationState {
+  startNode: LocationPoint | null;
+  endNode: LocationPoint | null;
+  isNavigating: boolean;
+}
+
+/**
+ * Butterfly animation object for celebration effects
+ */
+export interface Butterfly {
+  id: number;
+  x: number;
+  y: number;
+  rotation: number;
+  size: number;
+  duration: number;
+  image: string;
+}
