@@ -131,8 +131,10 @@ export default function LandingPage() {
 
         <div className="mt-5 text-center relative z-10">
           <p className="text-slate-500 text-[10px] sm:text-xs font-medium tracking-wide">
-            Developed by Thejas SB, Subham Sahoo S, Sriram B @ Techsprint
-            GDGoC-CIT
+            Developed by Thejas SB, Subham Sahoo S, Sriram B.
+          </p>
+          <p className="text-slate-500 text-[10px] sm:text-xs font-medium tracking-wide">
+            &copy; All rights reserved.
           </p>
         </div>
       </div>
