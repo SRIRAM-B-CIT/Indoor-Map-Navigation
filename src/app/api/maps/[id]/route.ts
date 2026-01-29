@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body: Partial<MapData> & { pin?: string } = await request.json();
 
     // Verify PIN
-    const REQUIRED_PIN = "2026";
+    const REQUIRED_PIN = process.env.MAP_UPDATE_PIN;
     if (!body.pin || body.pin !== REQUIRED_PIN) {
       return NextResponse.json(
         {

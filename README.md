@@ -1,16 +1,30 @@
-# Indoor Navigation System
+# NavX - Indoor Navigation System
 
 A comprehensive indoor navigation system for college campuses featuring multi-map navigation, AI-powered chatbot assistance, and QR code integration for seamless wayfinding.
 
-## Tech Stack
+## 🚀 Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript (Strict mode)
-- **Styling**: Tailwind CSS
-- **UI Library**: Framer Motion for animations
-- **Database**: MongoDB with Mongoose
+- **Framework**: Next.js 16+ with App Router
+- **Language**: TypeScript 5+ (Strict mode)
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Lucide React for icons
+- **Animations**: Framer Motion 12+
+- **State Management**: Zustand 5+
+- **Database**: MongoDB with Mongoose 9+
+- **Authentication**: NextAuth.js 4+
 - **Graphics**: HTML5 Canvas for map rendering
-- **NLP**: Brain.js for natural language processing
+- **NLP**: Node-NLP for natural language processing
+- **QR Codes**: QRCode.react for QR generation
+- **Image Processing**: Browser Image Compression
+
+## ✨ Latest Features (v0.1.0)
+
+- 🔐 **Authentication System** - Secure admin authentication with NextAuth.js
+- 🖼️ **Advanced Image Processing** - Optimized map image handling with browser compression
+- 🎨 **Modern UI Components** - Beautiful icons with Lucide React
+- ⚡ **Performance Optimized** - Latest Next.js 16+ with improved App Router
+- 📱 **Enhanced Mobile Experience** - Responsive design with Tailwind CSS 4
+- 🔄 **Real-time State Management** - Efficient state updates with Zustand 5+
 
 ## Key Features
 
@@ -25,17 +39,19 @@ A comprehensive indoor navigation system for college campuses featuring multi-ma
 ### AI Chatbot
 
 - 🤖 **Natural Language Understanding** - Ask in plain language like "Where is the canteen?" or "Take me to library"
-- 🧠 **Intent Recognition** - Understands 30+ location categories and destinations
+- 🧠 **Intent Recognition** - Understands 30+ location categories and destinations using Node-NLP
 - 📍 **Location-Aware** - Finds nearest destination based on your current location
-- 💬 **Conversational Interface** - Friendly, animated chat experience
+- 💬 **Conversational Interface** - Friendly, animated chat experience with Framer Motion
 
 ### Admin Dashboard
 
+- 🔐 **Secure Authentication** - Protected admin access with NextAuth.js
+- 🔒 **PIN Verification** - 4-digit PIN security for critical operations (save/delete maps)
 - 🎨 **Visual Map Editor** - Upload and edit maps with an intuitive canvas interface
 - ➕ **Node Management** - Add, edit, and delete nodes with drag-and-drop
 - 🔗 **Edge Creation** - Connect nodes with weighted edges for pathfinding
 - 🏷️ **Category Tagging** - Tag locations for chatbot recognition (canteen, library, etc.)
-- 📤 **Map Upload** - Support for PNG/JPG map images
+- 📤 **Map Upload** - Support for PNG/JPG map images with compression
 
 ### User Experience
 
@@ -57,8 +73,8 @@ A comprehensive indoor navigation system for college campuses featuring multi-ma
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd project1
+git clone https://github.com/subhamsahoo2024/NavX-indoor-nav.git
+cd NavX-indoor-nav
 ```
 
 2. Install dependencies:
@@ -69,19 +85,33 @@ npm install
 
 3. Set up environment variables:
 
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env` :
+Edit `.env`:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/indoor-navigation
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/navx-indoor-navigation
 # or for MongoDB Atlas:
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/indoor-navigation
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/navx-indoor-navigation
+
+# NextAuth Configuration
+NEXTAUTH_URL=app url or http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
 
 # Enable database mode (set to "true" to use MongoDB, "false" for mock data)
-NEXT_PUBLIC_USE_DATABASE=true or false
+NEXT_PUBLIC_USE_DATABASE=true
+
+# Admin Credentials
+
+# Admin 1 Credentials
+ADMIN1_USER=admin1
+ADMIN1_PASS=password1
+
+# Admin 2 Credentials
+ADMIN2_USER=admin2
+ADMIN2_PASS=password2
+
+#pin for map update
+MAP_UPDATE_PIN=pin
 ```
 
 4. Seed the database (optional):
@@ -110,36 +140,54 @@ npm run build
 npm start
 ```
 
-## Project Structure
+## 📁 Repository Structure
 
 ```
-src/
-├── app/
-│   ├── page.tsx              # Landing page
-│   ├── navigate/             # User navigation interface
-│   ├── admin/                # Admin dashboard
-│   │   └── map/[id]/        # Map editor
-│   └── api/
-│       ├── chat/            # NLP chatbot API
-│       ├── maps/            # Map CRUD operations
-│       ├── seed/            # Database seeding
-│       └── upload/          # Image upload handling
-├── components/
-│   ├── IndoorNavigation.tsx  # Main navigation canvas component
-│   ├── LocationSelector.tsx  # Location search & selection
-│   ├── AIChatbot.tsx        # AI chat interface
-│   └── admin/
-│       └── MapEditor.tsx    # Visual map editor
-├── lib/
-│   ├── db.ts                # MongoDB connection
-│   ├── mapService.ts        # Map data services
-│   └── pathfinder.ts        # Pathfinding algorithms
-├── models/
-│   └── Map.ts               # MongoDB schema
-├── types/
-│   └── navigation.ts        # TypeScript definitions
-└── data/
-    └── mockGraph.ts         # Sample data structure
+NavX-indoor-nav/
+├── public/
+│   └── maps/                 # Map image assets
+├── src/
+│   ├── app/
+│   │   ├── page.tsx          # Landing page
+│   │   ├── navigate/         # User navigation interface
+│   │   ├── login/            # Authentication pages
+│   │   ├── admin/            # Admin dashboard
+│   │   │   └── map/[id]/     # Map editor
+│   │   └── api/
+│   │       ├── auth/         # NextAuth.js configuration
+│   │       ├── chat/         # NLP chatbot API
+│   │       ├── maps/         # Map CRUD operations
+│   │       ├── seed/         # Database seeding
+│   │       └── upload/       # Image upload handling
+│   ├── components/
+│   │   ├── IndoorNavigation.tsx   # Main navigation canvas
+│   │   ├── LocationSelector.tsx   # Location search & selection
+│   │   ├── AIChatbot.tsx          # AI chat interface
+│   │   ├── PinVerificationModal.tsx # Location verification
+│   │   ├── SessionProvider.tsx    # Auth session provider
+│   │   └── admin/
+│   │       └── MapEditor.tsx      # Visual map editor
+│   ├── hooks/
+│   │   ├── useImageDimensions.ts  # Image dimension utilities
+│   │   └── useMapDimensions.ts    # Map dimension calculations
+│   ├── lib/
+│   │   ├── auth.ts              # NextAuth configuration
+│   │   ├── db.ts                # MongoDB connection
+│   │   ├── imageUtils.ts        # Image processing utilities
+│   │   ├── mapService.ts        # Map data services
+│   │   └── pathfinder.ts        # Pathfinding algorithms
+│   ├── models/
+│   │   └── Map.ts               # MongoDB schema
+│   ├── types/
+│   │   ├── navigation.ts        # Navigation type definitions
+│   │   └── next-auth.d.ts       # NextAuth type extensions
+│   └── data/
+│       └── mockGraph.ts         # Sample data structure
+├── eslint.config.mjs            # ESLint configuration
+├── next.config.ts               # Next.js configuration
+├── postcss.config.mjs           # PostCSS configuration
+├── tailwind.config.ts           # Tailwind CSS configuration
+└── tsconfig.json                # TypeScript configuration
 ```
 
 ## Architecture
@@ -172,12 +220,12 @@ Example: Campus Gate → Building A Entrance → Floor 2 Staircase → Room 201
 
 ### AI Chatbot System
 
-The chatbot uses a trained neural network (Brain.js) to:
+The chatbot uses a trained neural network (Node-NLP) to:
 
 1. Process user input in natural language
 2. Recognize intent from 30+ categories (canteen, library, restrooms, offices, etc.)
 3. Find the nearest matching location based on current position
-4. Provide conversational navigation guidance
+4. Provide conversational navigation guidance with smooth animations
 
 Supported categories include:
 
@@ -214,7 +262,6 @@ Supported categories include:
 ### For Users
 
 1. **Start Navigation**:
-
    - Visit `/navigate`
    - Scan a QR code OR manually select your starting location
    - Search for your destination
@@ -228,25 +275,30 @@ Supported categories include:
 
 ### For Admins
 
-1. **Create a Map**:
+1. **Access Admin Dashboard**:
+   - Go to `/login` for authentication (if NextAuth is configured)
+   - Navigate to `/admin` to access the dashboard
+   - All admin operations require proper authentication
 
-   - Go to `/admin`
-   - Click "Add New Map"
-   - Upload a map image
+2. **Create a Map**:
+   - Click "Add New Map" in the admin dashboard
+   - Upload a map image (PNG/JPG supported with compression)
    - Enter map details (name, type, parent)
+   - Save the map
 
-2. **Edit Nodes & Edges**:
-
-   - Click on a map to edit
-   - Add nodes by clicking on the map
+3. **Edit Maps with PIN Security**:
+   - Click on any existing map to open the editor
+   - Add/edit nodes by clicking on the map canvas
    - Connect nodes by dragging between them
-   - Set node properties (name, type, category)
+   - Set node properties (name, type, category for chatbot)
    - Assign edge weights for accurate pathfinding
+   - **Save changes**: Requires 4-digit PIN
+   - **Delete map**: Also requires PIN verification for security
 
-3. **Tag for Chatbot**:
-   - Select a node in the editor
-   - Choose the appropriate category
-   - Save to make it discoverable via chatbot
+4. **Configure Categories for Chatbot**:
+   - Select a node in the map editor
+   - Choose appropriate category (canteen, library, restroom, etc.)
+   - Save to make locations discoverable via AI chatbot
 
 ## Database Schema
 
@@ -281,19 +333,94 @@ Supported categories include:
 }
 ```
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+We welcome contributions to NavX! Please follow these steps:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+### Development Setup
 
-## License
+1. **Fork the repository**
 
-This project is licensed under the MIT License.
+   ```bash
+   # Fork on GitHub, then clone your fork
+   git clone https://github.com/your-username/NavX-indoor-nav.git
+   cd NavX-indoor-nav
+   ```
 
-## Support
+2. **Create a feature branch**
 
-For issues and questions, please open an issue on the GitHub repository.
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+4. **Set up environment**
+   - Copy `.env.example` to `.env.local`
+   - Configure your MongoDB connection
+   - Set up NextAuth.js secrets
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+### Code Standards
+
+- ✅ Use TypeScript strict mode
+- ✅ Follow Next.js 16+ App Router conventions
+- ✅ Implement proper error handling
+- ✅ Write complete, working code (no placeholder comments)
+- ✅ Use Tailwind CSS for styling
+- ✅ Follow the existing project structure
+
+### Submitting Changes
+
+1. **Test your changes thoroughly**
+
+   ```bash
+   npm run build  # Ensure the project builds
+   npm run lint   # Check for linting issues
+   ```
+
+2. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "feat: add your feature description"
+   ```
+
+3. **Push to your fork**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+4. **Submit a Pull Request**
+   - Use a clear title and description
+   - Reference any related issues
+   - Include screenshots for UI changes
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+Need help? Here's how to get support:
+
+- 🐛 **Found a bug?** [Open an issue](https://github.com/subhamsahoo2024/NavX-indoor-nav/issues)
+- 💡 **Have a feature request?** [Start a discussion](https://github.com/subhamsahoo2024/NavX-indoor-nav/discussions)
+- ❓ **Have questions?** Check our [documentation](https://github.com/subhamsahoo2024/NavX-indoor-nav/wiki) or create an issue
+
+## 👥 Team
+
+Built with ❤️ by the NavX development team.
+
+---
+
+⭐ **Like this project?** Give it a star on [GitHub](https://github.com/subhamsahoo2024/NavX-indoor-nav)!
