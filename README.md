@@ -3,9 +3,7 @@
 ## Demo Links
 
 - Live app: [https://cit-maps.vercel.app/navigate](https://cit-maps.vercel.app/navigate)
-- User video: [Google Drive](https://drive.google.com/file/d/12oYLuqPKdzuLeeI3xmOHRXMqgppZ_io3/view?usp=drivesdk)
-- Admin video: [Google Drive](https://drive.google.com/file/d/1LhHeYyNb0umdKHcWokzJStHdOk-NDESG/view?usp=drivesdk)
-
+- Demo video: [Google Drive](https://drive.google.com/file/d/1GQh00n_zqIyaizncatNpfZbP1uYgX6Qq/view?usp=drivesdk)
 NavX is an indoor navigation system for college campuses with multi-map routing, QR-based start selection, an AI chatbot, and an admin map editor.
 
 ## Quick Start
